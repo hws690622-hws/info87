@@ -27,26 +27,26 @@ Files: `app.py`, `storage.py`, `tests/test_app.py`, `requirements.txt`.
 Interfaces: `create_app(data_dir, password=None)` returns Flask app; JSON routes
 `/api/session`, `/api/login`, `/api/logout`, `/api/entries`, `/api/entries/<id>`, `/api/export`.
 
-- [ ] Write behavioral API tests for authentication, CRUD, validation, conflicts, persistence and export.
-- [ ] Run `python -m unittest discover -s tests -v`; observe missing implementation.
-- [ ] Implement API, private state directory and SQLite versioned updates.
-- [ ] Run the suite; require all tests passing.
+- [x] Write behavioral API tests for authentication, CRUD, validation, conflicts, persistence and export.
+- [x] Run `python -m unittest discover -s tests -v`; observe missing implementation.
+- [x] Implement API, private state directory and SQLite versioned updates.
+- [x] Run the suite; require all tests passing.
 
 ### Task 2: Responsive interface
 
 Files: `templates/index.html`, `static/app.js`, `static/style.css`, `tests/browser_smoke.py`.
 Consumes Task 1 JSON routes; produces a Chinese login and workbench.
 
-- [ ] Write browser checks for real login, task completion, notes, links, reload persistence and mobile layout.
-- [ ] Run against the service and observe missing interface.
-- [ ] Implement accessible forms, text-safe rendering, search, polling, version conflict handling and export.
-- [ ] Run browser checks at desktop and 390px mobile widths.
+- [x] Write browser checks for real login, task completion, notes, links, reload persistence and mobile layout.
+- [x] Run against the service and observe missing interface.
+- [x] Implement accessible forms, text-safe rendering, search, polling, version conflict handling and export.
+- [x] Run browser checks at desktop and 390px mobile widths.
 
 ### Task 3: Delivery and environment
 
 Files: `README.md`, `.github/workflows/test.yml`, `scripts/check.sh`.
 
-- [ ] Document installation, password management, persistent data, HTTPS deployment and backup.
-- [ ] Exercise installation, startup, restart and live authenticated HTTP request.
-- [ ] Review code, run required checks, commit and push `HEAD:main` without force.
-- [ ] Save tested install/start configuration; verify remote commit and clean repository state.
+- [x] Document installation, password management, persistent data, HTTPS deployment and backup.
+- [x] Exercise installation, startup, restart and live authenticated HTTP request.
+- [x] Review code, run required checks, commit and push `HEAD:main` without force.
+- [x] Save tested install/start configuration; verify remote commit and clean repository state.
