@@ -48,7 +48,10 @@ def validate(data):
     if item['kind'] == 'link':
         try:
             url = urlsplit(item['url'])
-            valid = url.scheme in ('http', 'https') and url.hostname and not url.username and not url.password
+            url.port  # Access validates numeric port and its permitted range.
+            valid = (url.scheme in ('http', 'https') and url.hostname and not url.username and not url.password
+                     and not any(char.isspace() or ord(char) < 32 for char in url.netloc)
+                     and '\\' not in url.netloc)
         except ValueError:
             valid = False
         if not valid:
@@ -108,7 +111,7 @@ def create_app(data_dir=None, password=None):
                     return jsonify(error='需要 JSON 格式的请求。'), 400
                 if not isinstance(request.get_json(), dict):
                     return jsonify(error='请求内容格式不正确。'), 400
-            if request.path not in ('/api/login', '/api/session') and not authenticated():
+            if request.path not in ('/api/login', '/api/logout', '/api/session') and not authenticated():
                 return jsonify(error='请先登录。'), 401
 
     @app.after_request
@@ -250,7 +253,11 @@ def main():
         from waitress import serve
         app = create_app()
         print(f'日常工作台已启动，监听 {args.host}:{args.port}。', flush=True)
-        serve(app, host=args.host, port=args.port, threads=4, max_request_body_size=128 * 1024)
+        proxy = {}
+        if os.environ.get('WORKBENCH_TRUST_PROXY') == '1':
+            # Enable only when access to this port is restricted to the trusted reverse proxy.
+            proxy = {'trusted_proxy':'*', 'trusted_proxy_headers':{'x-forwarded-proto'}}
+        serve(app, host=args.host, port=args.port, threads=4, max_request_body_size=128 * 1024, **proxy)
 
 
 if __name__ == '__main__':

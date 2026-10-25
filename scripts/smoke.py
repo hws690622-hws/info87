@@ -11,7 +11,7 @@ directory = Path(os.environ.get('WORKBENCH_DATA_DIR', Path(__file__).resolve().p
 password = os.environ.get('WORKBENCH_PASSWORD')
 if password is None:
     password = (directory / 'password.txt').read_text().strip()
-opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
 
 def call(path, method='GET', data=None, extra=None):

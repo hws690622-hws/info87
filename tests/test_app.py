@@ -4,6 +4,10 @@ import unittest
 import os
 import subprocess
 import sys
+import socket
+import time
+import urllib.request
+import urllib.error
 from pathlib import Path
 
 from app import create_app
@@ -112,6 +116,51 @@ class WorkbenchTest(unittest.TestCase):
         self.login()
         create_app(Path(self.tmp.name), password='another-password-long-enough')
         self.assertEqual(self.client.get('/api/entries').status_code, 401)
+        self.assertEqual(self.send('POST', '/api/logout', {}).status_code, 200)
+
+    def test_invalid_link_ports_and_hostnames_are_rejected(self):
+        self.login()
+        for url in ['https://example.com:abc', 'https://example.com:99999', 'https://exa mple.com']:
+            with self.subTest(url=url):
+                self.assertEqual(self.add(kind='link', url=url).status_code, 400)
+
+    def test_production_launcher_accepts_https_proxy_and_rejects_untrusted_headers(self):
+        for trusted, expected in [('1', 200), ('0', 403)]:
+            with self.subTest(trusted=trusted), socket.socket() as sock:
+                sock.bind(('127.0.0.1', 0))
+                port = sock.getsockname()[1]
+                sock.close()
+                env = {**os.environ, 'WORKBENCH_DATA_DIR':str(Path(self.tmp.name) / trusted),
+                       'WORKBENCH_PASSWORD':'a-test-password-long-enough', 'WORKBENCH_TRUST_PROXY':trusted}
+                process = subprocess.Popen([sys.executable, 'app.py', '--port', str(port)],
+                    cwd=Path(__file__).resolve().parents[1], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                try:
+                    base = f'http://127.0.0.1:{port}'
+                    for _ in range(100):
+                        try:
+                            with opener.open(base + '/healthz', timeout=0.2) as response:
+                                self.assertEqual(response.status, 200)
+                            break
+                        except (urllib.error.URLError, TimeoutError):
+                            if process.poll() is not None:
+                                self.fail('Production launcher exited before readiness')
+                            time.sleep(0.05)
+                    else:
+                        self.fail('Production launcher did not become ready')
+                    req = urllib.request.Request(base + '/api/login',
+                        data=json.dumps({'password':'a-test-password-long-enough'}).encode(),
+                        headers={'Host':'workbench.example', 'Origin':'https://workbench.example',
+                                 'X-Forwarded-Proto':'https', 'X-Workbench':'1', 'Content-Type':'application/json'})
+                    try:
+                        with opener.open(req, timeout=2) as response:
+                            status = response.status
+                    except urllib.error.HTTPError as error:
+                        status = error.code
+                    self.assertEqual(status, expected)
+                finally:
+                    process.terminate()
+                    process.wait(timeout=5)
 
     def test_https_proxy_can_submit_same_origin_requests(self):
         previous = os.environ.get('WORKBENCH_TRUST_PROXY')
