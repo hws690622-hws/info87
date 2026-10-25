@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c6455">
+  <meta name="description" content="属于你的日常工作台，收好待办、笔记和常用链接。">
+  <title>日常 · 工作台</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <section id="login-screen" class="login-screen">
+    <div class="login-intro"><span class="eyebrow">YOUR EVERYDAY SPACE</span><h1>日常有序，<br>工作从容。</h1><p>待办、灵感、常用的网站，<br>在这里各得其所。</p><div class="login-art" aria-hidden="true"><span>✓</span><span>记</span><span>↗</span></div></div>
+    <form id="login-form" class="login-card">
+      <div class="brand-icon" aria-hidden="true">日</div><h2>欢迎回到工作台</h2><p class="muted">输入你的密码，接着安排今天。</p>
+      <label for="password">登录密码</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024" autofocus>
+      <p id="login-error" class="error" role="alert"></p><button class="primary" type="submit">进入工作台 <span aria-hidden="true">↗</span></button>
+      <p class="login-foot">一个属于自己的空间，陪你在不同设备间继续。</p>
+    </form>
+  </section>
+  <div id="workspace" class="workspace" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">日</span><span>日常<span class="brand-small">个人工作台</span></span></a>
+      <p class="nav-label">我的空间</p>
+      <nav aria-label="内容分类">
+        <button class="nav-item active" data-filter="all" aria-pressed="true"><span aria-hidden="true">▦</span> 总览 <span class="nav-count" id="count-all">0</span></button>
+        <button class="nav-item" data-filter="task" aria-pressed="false"><span aria-hidden="true">☑</span> 待办事项 <span class="nav-count" id="count-task">0</span></button>
+        <button class="nav-item" data-filter="note" aria-pressed="false"><span aria-hidden="true">▤</span> 工作笔记 <span class="nav-count" id="count-note">0</span></button>
+        <button class="nav-item" data-filter="link" aria-pressed="false"><span aria-hidden="true">↗</span> 常用链接 <span class="nav-count" id="count-link">0</span></button>
+      </nav>
+      <div class="sidebar-bottom"><div class="quiet-card"><span aria-hidden="true">✦</span><p>留一点空间，<br>给今天的好想法。</p></div><a class="utility" href="/api/export" download>↓ 导出我的数据</a><button class="utility" id="logout">↪ 退出登录</button><div class="profile"><span class="avatar">我</span><div>我的工作空间<small>仅自己使用</small></div></div></div>
+    </aside>
+    <main>
+      <header class="topbar"><span id="today"></span><div class="connection"><span id="connection-dot" class="connection-dot"></span><span id="connection-text">正在连接</span></div></header>
+      <section class="content">
+        <div class="welcome"><div><p class="eyebrow">A LITTLE CLARITY, EVERY DAY</p><h1>把今天，安排从容。</h1><p class="muted">把琐事收好，把注意力留给重要的事。</p></div><span class="welcome-mark" aria-hidden="true">✳</span></div>
+        <div class="stats" aria-label="工作概况">
+          <div class="stat"><span class="stat-icon task-icon" aria-hidden="true">✓</span><div><span class="muted">未完成待办</span><strong id="stat-tasks">0</strong></div><span class="stat-hint">一件一件来</span></div>
+          <div class="stat"><span class="stat-icon note-icon" aria-hidden="true">▤</span><div><span class="muted">工作笔记</span><strong id="stat-notes">0</strong></div><span class="stat-hint">让想法有处安放</span></div>
+          <div class="stat"><span class="stat-icon link-icon" aria-hidden="true">↗</span><div><span class="muted">常用链接</span><strong id="stat-links">0</strong></div><span class="stat-hint">随时找到所需</span></div>
+        </div>
+        <div class="section-title"><div><h2 id="section-heading">我的内容</h2><span id="result-count" class="muted">正在读取…</span></div><button id="refresh" class="text-button">↻ 刷新</button></div>
+        <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索标题、笔记或网址…" aria-label="搜索内容"></label><div class="create-actions"><button data-create="task" class="primary">＋ 新建待办</button><button data-create="note" class="secondary">＋ 新建笔记</button><button data-create="link" class="secondary">＋ 新建链接</button></div></div>
+        <div id="entries" class="entries"></div>
+        <div id="empty" class="empty" hidden><span class="empty-symbol" aria-hidden="true">✦</span><h3 id="empty-title">从一件小事开始</h3><p id="empty-text">写下一个待办、记一段想法，或收藏一个常用网站。</p></div>
+        <footer class="main-footer"><span>日常 · 工作台</span><span>认真工作，也好好生活。</span></footer>
+      </section>
+    </main>
+  </div>
+  <dialog id="editor" aria-labelledby="editor-title">
+    <form id="entry-form"><div class="dialog-heading"><h2 id="editor-title">新建待办</h2><button type="button" id="close-editor" class="icon-button" aria-label="关闭编辑">×</button></div>
+      <label for="entry-title">标题</label><input id="entry-title" maxlength="160" required>
+      <div id="content-field"><label for="entry-content">内容</label><textarea id="entry-content" rows="8" maxlength="50000" placeholder="把值得记住的事写下来…"></textarea></div>
+      <div id="url-field"><label for="entry-url">网址</label><input id="entry-url" type="url" maxlength="2048" placeholder="https://"></div>
+      <div id="date-field"><label for="entry-date">截止日期 <span class="muted">（可不填）</span></label><input id="entry-date" type="date"></div>
+      <p id="editor-error" class="error" role="alert"></p><div class="dialog-actions"><button id="cancel-editor" class="secondary" type="button">取消</button><button class="primary" type="submit">保存</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
